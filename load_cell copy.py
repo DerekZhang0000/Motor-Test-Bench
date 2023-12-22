@@ -1,14 +1,16 @@
 import serial
 import csv
-import keyboard
+# import keyboard
 from datetime import datetime
 
 # use the port that the Arduino is connected to
-port_name = 'COM3'
-serial_conn = serial.Serial(port_name, 57600)
+LAPTOP_PORT= 'COM3'
+DESKTOP_PORT = 'COM5'
+BAUD_RATE = 57600
+serial_conn = serial.Serial(DESKTOP_PORT, BAUD_RATE)
 csv_file_name = f"load_cell_data_{datetime.now().date()}.csv"
 
-# serial_conn.write()
+serial_conn.write()
 
 exit = False
 logging = True
@@ -17,14 +19,14 @@ def toggle_log():
     global logging
     logging = (logging == False)
     print(f"Logging: {logging}")
-keyboard.on_press_key("t", lambda _: toggle_log())
+# keyboard.on_press_key("t", lambda _: toggle_log())
 
 def quit():
     global exit, logging
     exit = True
     logging = False
     print("Quitting...")
-keyboard.on_press_key("q", lambda _: quit())
+# keyboard.on_press_key("q", lambda _: quit())
 
 with open(csv_file_name, 'w', newline='') as file:
     writer = csv.writer(file)
