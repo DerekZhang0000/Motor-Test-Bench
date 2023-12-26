@@ -11,7 +11,7 @@ const int AUX_INPUT_PIN = 8;  // Used to get the RPM from ESC
 const int PWM_FREQUENCY = 8000;  // ESC is set to 8 kHz
 
 static int pwm = 0; // PWM value
-static int pole_pairs = 6;  // Number of pole pairs in the motor
+static int pole_pairs = 0;  // Number of pole pairs in the motor
 static unsigned long program_start_time = millis(); // Milliseconds at program start
 
 static String data = "";
@@ -76,11 +76,20 @@ void calibrate_esc()
   */
 
   Serial.println("<info=Calibrating ESC (press Reset or load PWM program to arm)");
-  while (var != "pwm") { await_data(var, val); } // Waits indefinitely for the initiation sequence PWM
-  pwm = val.toInt();
+  while (pwm == 0 || pole_pairs == 0) {
+    await_data(var, val);
+    if (var == "pwm") {
+      pwm = val.toInt();
+      Serial.print("<info=Initiation PWM set to ");
+      Serial.println(pwm);
+    } else if (var == "pole_pairs") {
+      pole_pairs = val.toInt();
+      Serial.print("<info=Set # pole pairs to ");
+      Serial.println(pole_pairs);
+    }
+  } // Waits indefinitely for the initiation sequence PWM and pole pairs
+
   Timer1.attachInterrupt(pwm_timer_ISR);
-  Serial.print("<info=Initiation PWM set to ");
-  Serial.println(pwm);
   delay(1000);
 
   Serial.println("<info=Calibrating ESC complete");

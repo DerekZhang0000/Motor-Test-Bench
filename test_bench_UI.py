@@ -37,7 +37,7 @@ def write_to_csv(item_list):
 write_to_csv(["Variable", "Value", "Timestamp"])
 
 """
-    Config Settings Setup
+    Config Setup
 """
 if not os.path.exists(os.path.join(program_dir_path, ".settings")): # Creates a hidden settings directory
     os.mkdir(os.path.join(program_dir_path, ".settings"))
@@ -49,10 +49,10 @@ config.read(config_path)
 if not config.has_section("Settings"):  # Creates a config file with default values if one does not exist
     config.add_section("Settings")
     config.set("Settings", "SERIAL_PORT", "COM5")
-    config.set("Settings", "RESET_PWM", "150")
-    config.set("Settings", "POLE_PAIRS", "2")
-    config.set("Settings", "MIN_PWM", "128")
+    config.set("Settings", "POLE_PAIRS", "6")
+    config.set("Settings", "MIN_PWM", "127")
     config.set("Settings", "MAX_PWM", "120")
+    config.set("Settings", "RESET_PWM", "150")
     with open(config_path, 'w') as configfile:
         config.write(configfile)
 
@@ -63,12 +63,16 @@ def write_to_config(var, val):
 
 SERIAL_PORT = config.get("Settings", "SERIAL_PORT")
 BAUD_RATE = 57600
-RESET_PWM = int(config.get("Settings", "RESET_PWM"))
 POLE_PAIRS = int(config.get("Settings", "POLE_PAIRS"))
 MIN_PWM = int(config.get("Settings", "MIN_PWM"))
 MAX_PWM = int(config.get("Settings", "MAX_PWM"))
+RESET_PWM = int(config.get("Settings", "RESET_PWM"))    # PWM that resets/arms the ESC
+STOP_PWM = 0    # PWM that silences the ESC
 
 serial_conn = serial.Serial(SERIAL_PORT, BAUD_RATE)
+
+def write_to_serial(command):
+    serial_conn.write(f"{command}".encode("utf-8"))
 
 """
     UI Setup
@@ -86,39 +90,42 @@ custom_command_entry = tk.Text(root, width=65, height=4)
 custom_command_entry.grid(row=0, column=0, padx=10, pady=10)
 
 # Custom Command Input Button
-def on_send_command():
+def send_command():
     command = custom_command_entry.get("1.0", tk.END).strip()
-    serial_conn.write(f"{command}".encode("utf-8"))
-send_command_button = tk.Button(root, text="Enter", command=on_send_command)
+    write_to_serial(command)
+send_command_button = tk.Button(root, text="Enter", command=send_command)
 send_command_button.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky=tk.SW)
 # Custom Command Input Button Label
 send_command_label = tk.Label(root, text="Send Custom Command")
 send_command_label.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky=tk.NW)
 
 # Load PWM Program Button
-def on_pwm_program_load():
+def load_pwm_program():
     file_path = filedialog.askopenfilename(title="Select a File", filetypes=[("CSV File", "*.csv")])
 
     def process_pwm_program():
         with open(file_path, 'r') as csv_file:
+            write_to_serial(f"pwm={RESET_PWM}")
+            time.sleep(1)
             if not logging:
                 toggle_logging()
-            serial_conn.write(f"pwm={RESET_PWM}".encode("utf-8"))
-            time.sleep(2)
+            time.sleep(1)
+
             csv_reader = csv.reader(csv_file)
             for value_list in csv_reader:
                 if value_list == [] or not value_list[0].isnumeric():
                     continue
                 pwm, duration = value_list
-                serial_conn.write(f"pwm={pwm}".encode("utf-8"))
+                write_to_serial(f"pwm={pwm}")
                 time.sleep(float(duration))
-            serial_conn.write(f"pwm={RESET_PWM}".encode("utf-8"))
-            if logging:
-                toggle_logging()
+
+        stop_esc()
+        if logging:
+            toggle_logging()
 
     threading.Thread(target=process_pwm_program).start()    # Runs an anonymous thread so that time.sleep does not freeze the UI
 
-load_pwm_program_button = tk.Button(root, text="Load", command=on_pwm_program_load)
+load_pwm_program_button = tk.Button(root, text="Load", command=load_pwm_program)
 load_pwm_program_button.grid(row=0, column=5, columnspan=2, padx=10, pady=10, sticky=tk.SE)
 # Load PWM Program Button Label
 load_pwm_program_label = tk.Label(root, text="Load PWM Program")
@@ -164,11 +171,17 @@ terminal_text = tk.Text(root, width=65, state=tk.DISABLED, height=20)
 terminal_text.grid(row=1, column=0, padx=10, pady=10)
 
 # ESC PWM Reset Button
-def on_pwm_reset():
+def reset_pwm():
     update_reset_pwm()
-    serial_conn.write(f"pwm={RESET_PWM}".encode("utf-8"))
-reset_pwm_button = tk.Button(root, text="Reset", command=on_pwm_reset)
+    write_to_serial(f"pwm={RESET_PWM}")
+reset_pwm_button = tk.Button(root, text="Reset", command=reset_pwm)
 reset_pwm_button.grid(row=1, column=1, padx=10, pady=10, sticky=tk.SW)
+
+# Stop ESC Button
+def stop_esc():
+    write_to_serial(f"pwm={STOP_PWM}")
+stop_esc_button = tk.Button(root, text="STOP", command=stop_esc, fg="white", bg="red")
+stop_esc_button.grid(row=1, column=1, padx=10, pady=10, sticky=tk.W)
 
 # JAD Logo
 logo_path = os.path.join(data_dir_path, "assets", "JAD-logo.png")
@@ -181,11 +194,11 @@ logo_label.grid(row=1, column=2, columnspan=5, padx=10, pady=10)
     Row 2
 """
 # ESC PWM Slider
-def on_pwm_slider_change(event=None):
-    serial_conn.write(f"pwm={pwm_slider.get()}".encode("utf-8"))
+def pwm_slider_change(event=None):
+    write_to_serial(f"pwm={pwm_slider.get()}")
 pwm_slider = tk.Scale(root, from_=MIN_PWM, to=MAX_PWM, orient=tk.HORIZONTAL, length=400, sliderrelief=tk.RIDGE)
 pwm_slider.grid(row=2, column=0, padx=10, pady=10, sticky=tk.S)
-pwm_slider.bind("<ButtonRelease>", on_pwm_slider_change)
+pwm_slider.bind("<ButtonRelease>", pwm_slider_change)
 pwm_slider.set(MIN_PWM)
 # ESC PWM Label
 pwm_slider_label = tk.Label(root, text="PWM")
@@ -245,11 +258,12 @@ def update_logging_button_color():
         toggle_logging_button.config(bg="red")
 def toggle_logging():
     global logging
-    logging = not logging
     if logging:
-        serial_conn.write(f"log_start=0".encode("utf-8"))
+        write_to_serial(f"log_stop=0")
+        logging = False
     else:
-        serial_conn.write(f"log_stop=0".encode("utf-8"))
+        write_to_serial(f"log_start=0")
+        logging = True
     update_logging_button_color()
 toggle_logging_button = tk.Button(root, text="Logging", command=toggle_logging, fg="white", bg="green")
 toggle_logging_button.grid(row=2, column=4, padx=10, pady=10, sticky=tk.S)
@@ -259,7 +273,7 @@ def update_pole_pairs(event=None):
     global POLE_PAIRS
     try:
         POLE_PAIRS = int(pole_pairs_entry.get())
-        serial_conn.write(f"pole_pairs={POLE_PAIRS}".encode("utf-8"))
+        write_to_serial(f"pole_pairs={POLE_PAIRS}")
         write_to_config("POLE_PAIRS", POLE_PAIRS)
     except:
         pass
@@ -292,5 +306,7 @@ serial_port_label.grid(row=2, column=6, padx=10, pady=10, sticky=tk.N)
 
 terminal_thread = threading.Thread(target=update_terminal, daemon=True)
 terminal_thread.start()
+
+root.after(2000, update_pole_pairs) # ESC does not automatically update pole pairs from config settings
 
 root.mainloop()
