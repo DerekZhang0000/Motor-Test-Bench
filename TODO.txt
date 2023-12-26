@@ -1,6 +1,8 @@
 TODO:
 Make a new wiring diagram that includes a 5V splitter
 
+Write an instructions document for the application
+
 Add functionality (another program?) to combine logs
 
 DONE:

@@ -37,7 +37,7 @@ def write_to_csv(item_list):
 write_to_csv(["Variable", "Value", "Timestamp"])
 
 """
-    Config Setup
+    Config Settings Setup
 """
 if not os.path.exists(os.path.join(program_dir_path, ".settings")): # Creates a hidden settings directory
     os.mkdir(os.path.join(program_dir_path, ".settings"))
@@ -81,19 +81,19 @@ root.geometry("1060x520")
 """
     Row 0
 """
-# Text Input
-entry1 = tk.Text(root, width=65, height=4)
-entry1.grid(row=0, column=0, padx=10, pady=10)
+# Custom Command Input
+custom_command_entry = tk.Text(root, width=65, height=4)
+custom_command_entry.grid(row=0, column=0, padx=10, pady=10)
 
-# Text Input Button
-def on_submit():
-    text_value1 = entry1.get("1.0", tk.END).strip()
-    serial_conn.write(f"{text_value1}".encode("utf-8"))
-button_submit = tk.Button(root, text="Enter", command=on_submit)
-button_submit.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky=tk.SW)
-# Text Input Button Label
-button_submit_label = tk.Label(root, text="Send Custom Command")
-button_submit_label.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky=tk.NW)
+# Custom Command Input Button
+def on_send_command():
+    command = custom_command_entry.get("1.0", tk.END).strip()
+    serial_conn.write(f"{command}".encode("utf-8"))
+send_command_button = tk.Button(root, text="Enter", command=on_send_command)
+send_command_button.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky=tk.SW)
+# Custom Command Input Button Label
+send_command_label = tk.Label(root, text="Send Custom Command")
+send_command_label.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky=tk.NW)
 
 # Load PWM Program Button
 def on_pwm_program_load():
@@ -116,13 +116,13 @@ def on_pwm_program_load():
             if logging:
                 toggle_logging()
 
-    threading.Thread(target=process_pwm_program).start()    # Runs an anonymous thread to process the PWM program
+    threading.Thread(target=process_pwm_program).start()    # Runs an anonymous thread so that time.sleep does not freeze the UI
 
-button_load = tk.Button(root, text="Load", command=on_pwm_program_load)
-button_load.grid(row=0, column=5, columnspan=2, padx=10, pady=10, sticky=tk.SE)
+load_pwm_program_button = tk.Button(root, text="Load", command=on_pwm_program_load)
+load_pwm_program_button.grid(row=0, column=5, columnspan=2, padx=10, pady=10, sticky=tk.SE)
 # Load PWM Program Button Label
-button_load_label = tk.Label(root, text="Load PWM Program")
-button_load_label.grid(row=0, column=5, columnspan=2, padx=10, pady=10, sticky=tk.NE)
+load_pwm_program_label = tk.Label(root, text="Load PWM Program")
+load_pwm_program_label.grid(row=0, column=5, columnspan=2, padx=10, pady=10, sticky=tk.NE)
 
 """
     Row 1
@@ -151,24 +151,24 @@ def update_terminal():
             else:
                 var = var.upper()
 
-            if "," in val:  # ',' is only used in variables with a timestamp, which are logged
+            if "," in val:  # The ',' character is only used in variables with a timestamp, which are logged
                 write_to_csv([var] + val.split(','))
                 val = val.replace(',', " : ")
 
             line = f"[{var}] {val}"
-            entry2.configure(state=tk.NORMAL)
-            entry2.insert(tk.END, f"{line}\n")
-            entry2.configure(state=tk.DISABLED)
-            entry2.see(tk.END)
-entry2 = tk.Text(root, width=65, state=tk.DISABLED, height=20)
-entry2.grid(row=1, column=0, padx=10, pady=10)
+            terminal_text.configure(state=tk.NORMAL)
+            terminal_text.insert(tk.END, f"{line}\n")
+            terminal_text.configure(state=tk.DISABLED)
+            terminal_text.see(tk.END)
+terminal_text = tk.Text(root, width=65, state=tk.DISABLED, height=20)
+terminal_text.grid(row=1, column=0, padx=10, pady=10)
 
 # ESC PWM Reset Button
-def on_reset():
-    update_reset()
+def on_pwm_reset():
+    update_reset_pwm()
     serial_conn.write(f"pwm={RESET_PWM}".encode("utf-8"))
-button_reset = tk.Button(root, text="Reset", command=on_reset)
-button_reset.grid(row=1, column=1, padx=10, pady=10, sticky=tk.SW)
+reset_pwm_button = tk.Button(root, text="Reset", command=on_pwm_reset)
+reset_pwm_button.grid(row=1, column=1, padx=10, pady=10, sticky=tk.SW)
 
 # JAD Logo
 logo_path = os.path.join(data_dir_path, "assets", "JAD-logo.png")
@@ -181,62 +181,68 @@ logo_label.grid(row=1, column=2, columnspan=5, padx=10, pady=10)
     Row 2
 """
 # ESC PWM Slider
-def on_slider_change(event=None):
-    serial_conn.write(f"pwm={slider.get()}".encode("utf-8"))
-slider = tk.Scale(root, from_=MIN_PWM, to=MAX_PWM, orient=tk.HORIZONTAL, length=400, sliderrelief=tk.RIDGE)
-slider.grid(row=2, column=0, padx=10, pady=10, sticky=tk.S)
-slider.bind("<ButtonRelease>", on_slider_change)
-slider.set(MIN_PWM)
+def on_pwm_slider_change(event=None):
+    serial_conn.write(f"pwm={pwm_slider.get()}".encode("utf-8"))
+pwm_slider = tk.Scale(root, from_=MIN_PWM, to=MAX_PWM, orient=tk.HORIZONTAL, length=400, sliderrelief=tk.RIDGE)
+pwm_slider.grid(row=2, column=0, padx=10, pady=10, sticky=tk.S)
+pwm_slider.bind("<ButtonRelease>", on_pwm_slider_change)
+pwm_slider.set(MIN_PWM)
 # ESC PWM Label
-slider_label = tk.Label(root, text="PWM")
-slider_label.grid(row=2, column=0, padx=10, pady=10, sticky=tk.SW)
+pwm_slider_label = tk.Label(root, text="PWM")
+pwm_slider_label.grid(row=2, column=0, padx=10, pady=10, sticky=tk.SW)
 
 # ESC PWM Reset Entry
-def update_reset(event=None):
+def update_reset_pwm(event=None):
     global RESET_PWM
     try:
-        RESET_PWM = int(reset_entry.get())
+        RESET_PWM = int(reset_pwm_entry.get())
         write_to_config("RESET_PWM", RESET_PWM)
-    except ValueError:
+    except:
         pass
-reset_entry = tk.Entry(root, width=10)
-reset_entry.grid(row=2, column=1, padx=10, pady=10, sticky=tk.S)
-reset_entry.insert(0, RESET_PWM)
-reset_entry.bind("<Return>", update_reset)
+reset_pwm_entry = tk.Entry(root, width=10)
+reset_pwm_entry.grid(row=2, column=1, padx=10, pady=10, sticky=tk.S)
+reset_pwm_entry.insert(0, RESET_PWM)
+reset_pwm_entry.bind("<Return>", update_reset_pwm)
 # ESC PWM Reset Label
-reset_entry_label = tk.Label(root, text="Reset PWM")
-reset_entry_label.grid(row=2, column=1, padx=10, pady=10, sticky=tk.N)
+reset_pwm_label = tk.Label(root, text="Reset PWM")
+reset_pwm_label.grid(row=2, column=1, padx=10, pady=10, sticky=tk.N)
 
 # Min/Max PWM Entries
-def update_slider_range(event=None):
+def update_pwm_slider_range(event=None):
     global MIN_PWM, MAX_PWM
     try:
-        MIN_PWM = int(min_value_entry.get())
-        MAX_PWM = int(max_value_entry.get())
-        slider.config(from_=MIN_PWM, to=MAX_PWM)
+        MIN_PWM = int(min_pwm_entry.get())
+        MAX_PWM = int(max_pwm_entry.get())
+        pwm_slider.config(from_=MIN_PWM, to=MAX_PWM)
         write_to_config("MIN_PWM", MIN_PWM)
         write_to_config("MAX_PWM", MAX_PWM)
     except:
         pass
 # Min Slider Value Entry
-min_value_entry = tk.Entry(root, width=10)
-min_value_entry.grid(row=2, column=2, padx=10, pady=10, sticky=tk.S)
-min_value_entry.insert(0, MIN_PWM)
-min_value_entry.bind("<Return>", update_slider_range)
+min_pwm_entry = tk.Entry(root, width=10)
+min_pwm_entry.grid(row=2, column=2, padx=10, pady=10, sticky=tk.S)
+min_pwm_entry.insert(0, MIN_PWM)
+min_pwm_entry.bind("<Return>", update_pwm_slider_range)
 # Min Slider Value Label
-min_value_label = tk.Label(root, text="Min PWM")
-min_value_label.grid(row=2, column=2, padx=10, pady=10, sticky=tk.N)
+min_pwm_label = tk.Label(root, text="Min PWM")
+min_pwm_label.grid(row=2, column=2, padx=10, pady=10, sticky=tk.N)
 
 # Max Slider Value Entry
-max_value_entry = tk.Entry(root, width=10)
-max_value_entry.grid(row=2, column=3, padx=10, pady=10, sticky=tk.S)
-max_value_entry.insert(0, MAX_PWM)
-max_value_entry.bind("<Return>", update_slider_range)
+max_pwm_entry = tk.Entry(root, width=10)
+max_pwm_entry.grid(row=2, column=3, padx=10, pady=10, sticky=tk.S)
+max_pwm_entry.insert(0, MAX_PWM)
+max_pwm_entry.bind("<Return>", update_pwm_slider_range)
 # Max Slider Value Label
-max_value_label = tk.Label(root, text="Max PWM")
-max_value_label.grid(row=2, column=3, padx=10, pady=10, sticky=tk.N)
+max_pwm_label = tk.Label(root, text="Max PWM")
+max_pwm_label.grid(row=2, column=3, padx=10, pady=10, sticky=tk.N)
 
 # Toggle Logging Button
+def update_logging_button_color():
+    global logging
+    if logging:
+        toggle_logging_button.config(bg="green")
+    else:
+        toggle_logging_button.config(bg="red")
 def toggle_logging():
     global logging
     logging = not logging
@@ -245,13 +251,8 @@ def toggle_logging():
     else:
         serial_conn.write(f"log_stop=0".encode("utf-8"))
     update_logging_button_color()
-def update_logging_button_color():
-    if logging:
-        button_toggle_logging.config(bg="green")
-    else:
-        button_toggle_logging.config(bg="red")
-button_toggle_logging = tk.Button(root, text="Logging", command=toggle_logging, fg="white", bg="green")
-button_toggle_logging.grid(row=2, column=4, padx=10, pady=10, sticky=tk.S)
+toggle_logging_button = tk.Button(root, text="Logging", command=toggle_logging, fg="white", bg="green")
+toggle_logging_button.grid(row=2, column=4, padx=10, pady=10, sticky=tk.S)
 
 # Pole Pairs Entry
 def update_pole_pairs(event=None):
@@ -260,15 +261,15 @@ def update_pole_pairs(event=None):
         POLE_PAIRS = int(pole_pairs_entry.get())
         serial_conn.write(f"pole_pairs={POLE_PAIRS}".encode("utf-8"))
         write_to_config("POLE_PAIRS", POLE_PAIRS)
-    except ValueError:
+    except:
         pass
 pole_pairs_entry = tk.Entry(root, width=10)
 pole_pairs_entry.grid(row=2, column=5, padx=10, pady=10, sticky=tk.S)
 pole_pairs_entry.insert(0, POLE_PAIRS)
 pole_pairs_entry.bind("<Return>", update_pole_pairs)
 # Pole Pairs Label
-pole_pairs_entry_label = tk.Label(root, text="Pole Pairs")
-pole_pairs_entry_label.grid(row=2, column=5, padx=10, pady=10, sticky=tk.N)
+pole_pairs_label = tk.Label(root, text="Pole Pairs")
+pole_pairs_label.grid(row=2, column=5, padx=10, pady=10, sticky=tk.N)
 
 # Serial Port Entry
 def update_serial_port(event=None):
@@ -286,8 +287,8 @@ serial_port_entry.grid(row=2, column=6, padx=10, pady=10, sticky=tk.S)
 serial_port_entry.insert(0, SERIAL_PORT)
 serial_port_entry.bind("<Return>", update_serial_port)
 # Serial Port Label
-serial_port_entry_label = tk.Label(root, text="Serial Port")
-serial_port_entry_label.grid(row=2, column=6, padx=10, pady=10, sticky=tk.N)
+serial_port_label = tk.Label(root, text="Serial Port")
+serial_port_label.grid(row=2, column=6, padx=10, pady=10, sticky=tk.N)
 
 terminal_thread = threading.Thread(target=update_terminal, daemon=True)
 terminal_thread.start()
