@@ -84,7 +84,7 @@ void calibrate_esc()
       Serial.println(pwm);
     } else if (var == "pole_pairs") {
       pole_pairs = val.toInt();
-      Serial.print("<info=Set # pole pairs to ");
+      Serial.print("<info=Set # of pole pairs to ");
       Serial.println(pole_pairs);
     }
   } // Waits indefinitely for the initiation sequence PWM and pole pairs
@@ -139,7 +139,7 @@ void loop()
       Serial.println(pwm);
     } else if (var == "pole_pairs") {
       pole_pairs = val.toInt();
-      Serial.print("<info=Set # pole pairs to ");
+      Serial.print("<info=Set # of pole pairs to ");
       Serial.println(pole_pairs);
     }
   }

@@ -30,10 +30,10 @@ csv_path = os.path.join(program_dir_path, "logs", csv_filename)
 log_file_writer = None
 
 def write_to_csv(item_list):
-    if logging:
-        with open(csv_path, 'a', newline="") as csv_file:
-            log_file_writer = csv.writer(csv_file)
-            log_file_writer.writerow(item_list)
+    global log_file_writer
+    with open(csv_path, 'a', newline="") as csv_file:
+        log_file_writer = csv.writer(csv_file)
+        log_file_writer.writerow(item_list)
 write_to_csv(["Variable", "Value", "Timestamp"])
 
 """
@@ -72,6 +72,7 @@ STOP_PWM = 0    # PWM that silences the ESC
 serial_conn = serial.Serial(SERIAL_PORT, BAUD_RATE)
 
 def write_to_serial(command):
+    global serial_conn
     serial_conn.write(f"{command}".encode("utf-8"))
 
 """
@@ -104,6 +105,9 @@ def load_pwm_program():
     file_path = filedialog.askopenfilename(title="Select a File", filetypes=[("CSV File", "*.csv")])
 
     def process_pwm_program():
+        if file_path == "":
+            return
+
         with open(file_path, 'r') as csv_file:
             write_to_serial(f"pwm={RESET_PWM}")
             time.sleep(1)
@@ -120,9 +124,9 @@ def load_pwm_program():
                 time.sleep(float(duration))
 
         stop_esc()
+        time.sleep(1)
         if logging:
             toggle_logging()
-
     threading.Thread(target=process_pwm_program).start()    # Runs an anonymous thread so that time.sleep does not freeze the UI
 
 load_pwm_program_button = tk.Button(root, text="Load", command=load_pwm_program)
@@ -146,19 +150,20 @@ def update_terminal():
             line = serial_conn.readline().decode("utf-8").strip()
         except:
             pass
-        if logging or "log_start" in line or "log_stop" in line:
-            if len(line) == 0 or '=' not in line:
-                continue
-            if line[0] == '<':
-                line = line[1:]
 
-            var, val = line.split('=')
-            if var in var_dict:
-                var = var_dict[var]
-            else:
-                var = var.upper()
+        if len(line) == 0 or '=' not in line or '<' not in line:
+            continue
+        if line[0] == '<':
+            line = line[1:]
 
-            if "," in val:  # The ',' character is only used in variables with a timestamp, which are logged
+        var, val = line.split('=')
+        if var in var_dict:
+            var = var_dict[var]
+        else:
+            var = var.upper()
+
+        if logging or var == "LOG STOP":
+            if ',' in val:  # The ',' character is only used in variables with a timestamp, which are logged
                 write_to_csv([var] + val.split(','))
                 val = val.replace(',', " : ")
 
