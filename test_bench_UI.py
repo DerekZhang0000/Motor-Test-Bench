@@ -315,3 +315,4 @@ terminal_thread.start()
 root.after(2000, update_pole_pairs) # ESC does not automatically update pole pairs from config settings
 
 root.mainloop()
+stop_esc()
