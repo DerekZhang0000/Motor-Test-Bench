@@ -79,7 +79,7 @@ def write_to_serial(command):
     UI Setup
 """
 root = tk.Tk()
-root.title("JAD Test Bench UI")
+root.title("JAD Test Bench")
 root.iconbitmap(os.path.join(data_dir_path, "assets", "app-logo.ico"))
 root.geometry("1060x520")
 

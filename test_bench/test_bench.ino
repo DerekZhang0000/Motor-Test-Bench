@@ -58,7 +58,7 @@ void print_lc_reading()
 {
   //  Prints the load cell reading to the Serial channel.
   Serial.print("<lc=");
-  Serial.print(scale.get_units(), 1);
+  Serial.print(scale.get_units(), 4);
   Serial.print(",");
   Serial.println(millis() - program_start_time);
 }
@@ -104,14 +104,14 @@ void setup()
 
   // Load Cell Calibration
   Serial.print("<info=Pre-calibration load cell reading: ");
-  Serial.println(scale.read());
+  Serial.println(scale.read(), 4);
 
   // float calibration_factor = -282642 / 11;  // calibration_factor = pre-calibration load cell reading / known weight
   // scale.set_scale(calibration_factor);
   // scale.tare();
 
   Serial.print("<info=Post-calibration load cell reading: ");
-  Serial.println(scale.get_units(), 1);
+  Serial.println(scale.get_units(), 4);
 
   // ESC Setup
   pinMode(PWM_OUTPUT_PIN, OUTPUT);
