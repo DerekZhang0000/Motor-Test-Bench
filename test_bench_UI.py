@@ -84,7 +84,7 @@ root.iconbitmap(os.path.join(data_dir_path, "assets", "app-logo.ico"))
 root.geometry("1060x520")
 
 """
-    Row 0
+    UI Row 0
 """
 # Custom Command Input
 custom_command_entry = tk.Text(root, width=65, height=4)
@@ -136,7 +136,7 @@ load_pwm_program_label = tk.Label(root, text="Load PWM Program")
 load_pwm_program_label.grid(row=0, column=5, columnspan=2, padx=10, pady=10, sticky=tk.NE)
 
 """
-    Row 1
+    UI Row 1
 """
 # Terminal Output
 var_dict = {"lc" : "LOAD CELL",
@@ -196,7 +196,7 @@ logo_label = tk.Label(root, image=logo)
 logo_label.grid(row=1, column=2, columnspan=5, padx=10, pady=10)
 
 """
-    Row 2
+    UI Row 2
 """
 # ESC PWM Slider
 def pwm_slider_change(event=None):
@@ -309,9 +309,7 @@ serial_port_entry.bind("<Return>", update_serial_port)
 serial_port_label = tk.Label(root, text="Serial Port")
 serial_port_label.grid(row=2, column=6, padx=10, pady=10, sticky=tk.N)
 
-terminal_thread = threading.Thread(target=update_terminal, daemon=True)
-terminal_thread.start()
-
+threading.Thread(target=update_terminal, daemon=True).start()    # Runs an anonymous thread to update the terminal asynchonously
 root.after(2000, update_pole_pairs) # ESC does not automatically update pole pairs from config settings
 
 root.mainloop()
