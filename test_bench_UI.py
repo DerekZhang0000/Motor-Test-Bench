@@ -69,6 +69,7 @@ MAX_PWM = int(config.get("Settings", "MAX_PWM"))
 RESET_PWM = int(config.get("Settings", "RESET_PWM"))    # PWM that resets/arms the ESC
 STOP_PWM = 0    # PWM that silences the ESC
 
+serial_conn = None
 try:
     serial_conn = serial.Serial(SERIAL_PORT, BAUD_RATE)
 except: # Does not crash if the correct serial port is not initially connected
@@ -295,13 +296,13 @@ pole_pairs_label.grid(row=2, column=5, padx=10, pady=10, sticky=tk.N)
 
 # Serial Port Entry
 def update_serial_port(event=None):
-    global SERIAL_PORT
+    global SERIAL_PORT, serial_conn
     try:
         SERIAL_PORT = serial_port_entry.get()
-        serial_conn.port = SERIAL_PORT
+        write_to_config("SERIAL_PORT", SERIAL_PORT)
+        serial_conn = serial.Serial(SERIAL_PORT, BAUD_RATE)
         serial_conn.close()
         serial_conn.open()
-        write_to_config("SERIAL_PORT", SERIAL_PORT)
     except:
         pass
 serial_port_entry = tk.Entry(root, width=10)
