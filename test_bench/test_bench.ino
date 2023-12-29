@@ -107,7 +107,7 @@ void setup()
   Serial.println(scale.read(), 4);
 
   // float calibration_factor = -282642 / 11;  // calibration_factor = pre-calibration load cell reading / known weight
-  // scale.set_scale(calibration_factor);
+  // scale.set_scale(calibration_factor); // ADD MORE POINTS
   // scale.tare();
 
   Serial.print("<info=Post-calibration load cell reading: ");

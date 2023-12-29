@@ -69,7 +69,10 @@ MAX_PWM = int(config.get("Settings", "MAX_PWM"))
 RESET_PWM = int(config.get("Settings", "RESET_PWM"))    # PWM that resets/arms the ESC
 STOP_PWM = 0    # PWM that silences the ESC
 
-serial_conn = serial.Serial(SERIAL_PORT, BAUD_RATE)
+try:
+    serial_conn = serial.Serial(SERIAL_PORT, BAUD_RATE)
+except: # Does not crash if the correct serial port is not initially connected
+    pass
 
 def write_to_serial(command):
     global serial_conn
