@@ -1,5 +1,5 @@
 TODO:
-Write an instructions document for the application
+Make a README
 
 Add functionality (another program?) to combine logs
 
@@ -11,3 +11,4 @@ Add way to save settings
 Add a way to "program" sequences of specified pwms
 Make standalone executable
 Make the UI look nicer
+Make a new wiring diagram that includes a 5V splitter
