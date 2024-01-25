@@ -143,7 +143,8 @@ load_pwm_program_label.grid(row=0, column=5, columnspan=2, padx=10, pady=10, sti
     UI Row 1
 """
 # Terminal Output
-var_dict = {"lc" : "LOAD CELL",
+var_dict = {"lc1" : "LOAD CELL 1",
+            "lc2" : "LOAD CELL 2",
             "rpm" : "RPM",
             "log_start" : "LOG START",
             "log_stop" : "LOG STOP",}
