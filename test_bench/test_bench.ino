@@ -110,7 +110,8 @@ void setup()
 
   // Load Cell Calibration
   Serial.print("<info=Pre-calibration load cell readings: ");
-  Serial.println(scale1.read(), 4);
+  Serial.print(scale1.read(), 4);
+  Serial.print(" & ");
   Serial.println(scale2.read(), 4);
 
   // float calibration_factor = -282642 / 11;  // calibration_factor = pre-calibration load cell reading / known weight
@@ -119,8 +120,9 @@ void setup()
   // scale2.set_scale(calibration_factor);
   // scale2.tare();
 
-  Serial.print("<info=Post-calibration load cell reading: ");
-  Serial.println(scale1.get_units(), 4);
+  Serial.print("<info=Post-calibration load cell readings: ");
+  Serial.print(scale1.get_units(), 4);
+  Serial.print(" & ");
   Serial.println(scale2.get_units(), 4);
 
   // ESC Setup

@@ -45,7 +45,7 @@ if not os.path.exists(os.path.join(program_dir_path, ".settings")): # Creates a 
 
 config = configparser.ConfigParser()
 config_path = os.path.join(program_dir_path, ".settings", "config.ini")
-config.read(config_path)
+config.read(config_path)    # TODO: Fix bug where config file can not be read
 if not config.has_section("Settings"):  # Creates a config file with default values if one does not exist
     config.add_section("Settings")
     config.set("Settings", "SERIAL_PORT", "COM5")
