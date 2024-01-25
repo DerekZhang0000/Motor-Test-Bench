@@ -78,9 +78,7 @@ void pwm_timer_ISR()
 
 void calibrate_esc()
 {
-  /*
-    Waits for the user to enter the initiation sequence PWM for the ESC.
-  */
+  //  Waits for the user to enter the initiation sequence PWM for the ESC.
 
   Serial.println("<info=Calibrating ESC (press Reset or load PWM program to arm)");
   while (pwm == 0 || pole_pairs == 0) {
