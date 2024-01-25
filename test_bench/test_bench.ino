@@ -105,7 +105,8 @@ void setup()
   Serial.begin(57600);
   delay(1000);
   Serial.println("<info=Setup starting");
-  scale1.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+  scale1.begin(LOADCELL1_DOUT_PIN, LOADCELL1_SCK_PIN);
+  scale2.begin(LOADCELL2_DOUT_PIN, LOADCELL2_SCK_PIN);
 
   // Load Cell Calibration
   Serial.print("<info=Pre-calibration load cell readings: ");
