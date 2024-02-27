@@ -3,12 +3,9 @@
 #include "TimerOne.h"
 
 HX711 scale1;
-HX711 scale2;
 
 const int LOADCELL1_DOUT_PIN = 12;
 const int LOADCELL1_SCK_PIN = 13;
-const int LOADCELL2_DOUT_PIN = 10;
-const int LOADCELL2_SCK_PIN = 11;
 const int PWM_OUTPUT_PIN = 3;
 const int AUX_INPUT_PIN = 8;  // Used to get the RPM from ESC
 const int PWM_FREQUENCY = 8000;  // ESC is set to 8 kHz
@@ -64,10 +61,6 @@ void print_lc_readings()
   Serial.print(scale1.get_units(), 4);
   Serial.print(",");
   Serial.println(millis() - program_start_time);
-  Serial.print("<lc2=");
-  Serial.print(scale2.get_units(), 4);
-  Serial.print(",");
-  Serial.println(millis() - program_start_time);
 }
 
 void pwm_timer_ISR()
@@ -106,13 +99,10 @@ void setup()
   delay(1000);
   Serial.println("<info=Setup starting");
   scale1.begin(LOADCELL1_DOUT_PIN, LOADCELL1_SCK_PIN);
-  scale2.begin(LOADCELL2_DOUT_PIN, LOADCELL2_SCK_PIN);
 
   // Load Cell Calibration
-  Serial.print("<info=Pre-calibration load cell readings: ");
-  Serial.print(scale1.read(), 4);
-  Serial.print(" & ");
-  Serial.println(scale2.read(), 4);
+  Serial.print("<info=Pre-calibration load cell reading: ");
+  Serial.println(scale1.read(), 4);
 
   // float calibration_factor = -282642 / 11;  // calibration_factor = pre-calibration load cell reading / known weight
   // scale1.set_scale(calibration_factor); // ADD MORE POINTS
@@ -120,10 +110,8 @@ void setup()
   // scale2.set_scale(calibration_factor);
   // scale2.tare();
 
-  Serial.print("<info=Post-calibration load cell readings: ");
-  Serial.print(scale1.get_units(), 4);
-  Serial.print(" & ");
-  Serial.println(scale2.get_units(), 4);
+  Serial.print("<info=Post-calibration load cell reading: ");
+  Serial.println(scale1.get_units(), 4);
 
   // ESC Setup
   pinMode(PWM_OUTPUT_PIN, OUTPUT);

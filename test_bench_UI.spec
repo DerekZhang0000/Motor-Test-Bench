@@ -31,4 +31,4 @@ exe = EXE(pyz,
           runtime_tmpdir=None,
           icon='assets/app-logo.ico',
           onefile=True,
-          console=True)
+          console=False)
